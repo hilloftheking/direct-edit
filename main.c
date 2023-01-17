@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		SDL_RenderSetVSync(program.renderer, 1);
 		SDL_SetRenderDrawColor(program.renderer, 12, 25, 48, 255);
 
-		program.font_tex = load_1bpp_bitmap("fshould_quit = program_process();ont.bmp", program.renderer);
+		program.font_tex = load_1bpp_bitmap("font.bmp", program.renderer);
 		if (!program.font_tex) {
 			fputs("failed to load font.bmp", stderr);
 			break;
