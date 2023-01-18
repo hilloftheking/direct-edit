@@ -73,17 +73,22 @@ int main(int argc, char *argv[]) {
 			// Only attempt to render a little before the present should be
 			// due. This prevents blocking the event handling
 			if (SDL_GetTicks64() - last_present_tick > ms_render_interval) {
-				Uint64 debug_prepresent = SDL_GetTicks64();
-				SDL_RenderClear(program.renderer);
+				if (SDL_RenderClear(program.renderer)) {
+					sdl_error = 1;
+					break;
+				}
 				program_draw_text();
 				SDL_RenderPresent(program.renderer);
 				last_present_tick = SDL_GetTicks64();
 
 				// Change the interval at which presenting is attempted
 				// since the refresh rate may have changed
-				SDL_GetCurrentDisplayMode(
+				if (SDL_GetCurrentDisplayMode(
 					SDL_GetWindowDisplayIndex(program.window),
-					&disp_mode);
+					&disp_mode)) {
+					sdl_error = 1;
+					break;
+				}
 				// Try to present 1ms early so vsync is beaten
 				ms_render_interval = (1000 / disp_mode.refresh_rate) - 1;
 				if (ms_render_interval == (Uint64)-1) {
