@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		SDL_RenderSetVSync(program.renderer, 1);
-		SDL_SetRenderDrawColor(program.renderer, 12, 25, 48, 255);
+		SDL_SetRenderDrawBlendMode(program.renderer, SDL_BLENDMODE_BLEND);
 
 		program.font_tex = load_1bpp_bitmap("font.bmp", program.renderer);
 		if (!program.font_tex) {
@@ -53,11 +53,15 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 
+		// Put the window title into the program's text buffer
 		Buffer *buf = &program.text_buf;
 		buf->dat = malloc(50);
 		buf->size = 0;
 		buf->cap = 50;
 		buffer_append(buf, window_title, sizeof window_title - 1);
+
+		// Set the cursor to be at the end of the buffer
+		program.cursor_pos = buf->size;
 
 		// This is used to attempt to synchronize the renderer with vsync so
 		// that events are handled ASAP
@@ -73,11 +77,20 @@ int main(int argc, char *argv[]) {
 			// Only attempt to render a little before the present should be
 			// due. This prevents blocking the event handling
 			if (SDL_GetTicks64() - last_present_tick > ms_render_interval) {
+				SDL_SetRenderDrawColor(program.renderer, 12, 25, 48, 255);
 				if (SDL_RenderClear(program.renderer)) {
 					sdl_error = 1;
 					break;
 				}
-				program_draw_text();
+
+				SDL_Point cursor_point = program_draw_text();
+				SDL_Rect cursor_rect = {
+					cursor_point.x, cursor_point.y,
+					font_settings.width * font_settings.scale,
+					font_settings.height * font_settings.scale};
+				SDL_SetRenderDrawColor(program.renderer, 255, 255, 255, 100);
+				SDL_RenderFillRect(program.renderer, &cursor_rect);
+
 				SDL_RenderPresent(program.renderer);
 				last_present_tick = SDL_GetTicks64();
 

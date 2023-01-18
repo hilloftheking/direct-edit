@@ -9,6 +9,7 @@ typedef struct Program {
     SDL_Renderer *renderer;
     SDL_Texture *font_tex;
     Buffer text_buf;
+	size_t cursor_pos;
 } Program;
 
 Program program;
@@ -19,7 +20,7 @@ struct {
 	int height;
 	int x_padding;
 	int y_padding;
-} font_settings = {
+} static font_settings = {
 		2, // Scale
 		5, // Width
 		7, // Height
@@ -27,8 +28,8 @@ struct {
 		2  // Vertial Padding
 };
 
-// Draws each character in buffer
-static void program_draw_text() {
+// Draws each character in buffer and returns where the cursor should be
+static SDL_Point program_draw_text() {
 	// dst_rect is the rectangle of the render target that will change
 	SDL_Rect dst_rect;
 	dst_rect.x = 0;
@@ -36,7 +37,16 @@ static void program_draw_text() {
 	dst_rect.w = font_settings.width * font_settings.scale;
 	dst_rect.h = font_settings.height * font_settings.scale;
 
-	for (size_t i = 0; i < program.text_buf.size; i++) {
+	SDL_Point ret_cursor_point;
+
+	// Include the end of text_buf in case the cursor is there.
+	for (size_t i = 0; i <= program.text_buf.size; i++) {
+		if (i == program.cursor_pos) {
+			ret_cursor_point.x = dst_rect.x;
+			ret_cursor_point.y = dst_rect.y;
+		}
+		if (i == program.text_buf.size) break;
+
 		char c = program.text_buf.dat[i];
 		int index;
 		if (c >= ' ' && c <= '~') {
@@ -64,6 +74,8 @@ static void program_draw_text() {
 		dst_rect.x += (font_settings.width + font_settings.x_padding)
 			* font_settings.scale; // 5px + 1px spacing
 	}
+
+	return ret_cursor_point;
 }
 
 // Returns 0 to continue, 1 to exit
@@ -76,19 +88,24 @@ static int program_process() {
     case SDL_QUIT:
         should_quit = 1;
         break;
-    case SDL_TEXTINPUT:
-        char *input = event.text.text;
-        size_t len = strlen(input);
-        buffer_append(&program.text_buf, input, len);
+	case SDL_TEXTINPUT: {
+		char* input = event.text.text;
+		size_t len = strlen(input);
+		buffer_append(&program.text_buf, input, len);
+		program.cursor_pos += len;
+	}
         
         break;
     case SDL_KEYDOWN:
         switch (event.key.keysym.scancode) {
         case SDL_SCANCODE_RETURN:
             buffer_append(&program.text_buf, "\n", 1);
+			program.cursor_pos++;
             break;
         case SDL_SCANCODE_BACKSPACE:
             buffer_pop(&program.text_buf);
+			if (program.cursor_pos != 0)
+				program.cursor_pos--;
             break;
         }
 
