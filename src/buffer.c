@@ -17,7 +17,8 @@ void buffer_insert(Buffer *buffer, const char *dat, size_t len) {
     memcpy(dest, buffer->dat, buffer->pos);
   }
 
-  // Move text starting at the cursor to cursor+len
+  // Move text starting at the cursor to cursor+len (out of the way of
+  // the inserted text)
   memcpy(dest + buffer->pos + len, buffer->dat + buffer->pos,
          buffer->size - buffer->pos);
   // Copy the data to be inserted to the cursor position
