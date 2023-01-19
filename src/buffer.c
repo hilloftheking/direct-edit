@@ -5,14 +5,16 @@
 
 #include "buffer.h"
 
+const int BUFFER_INCREMENT = 100;
+
 void buffer_insert(Buffer *buffer, const char *dat, size_t len) {
   // Destination might change if allocating more memory
   char *dest = buffer->dat;
   size_t needed_cap = buffer->size + len;
 
   if (needed_cap > buffer->cap) {
-    puts("allocating more");
-    buffer->cap += 50 + len;
+    puts("making buffer bigger");
+    buffer->cap += BUFFER_INCREMENT + len;
     dest = malloc(buffer->cap);
     memcpy(dest, buffer->dat, buffer->pos);
   }
@@ -41,5 +43,15 @@ void buffer_pop(Buffer *buffer) {
   buffer->size--;
   if (buffer->pos != 0)
     buffer->pos--;
-  // TODO: smart memory deallocation
+  
+  if (buffer->cap - buffer->size > BUFFER_INCREMENT * 4) {
+    puts("making buffer smaller");
+    buffer->cap = buffer->size + BUFFER_INCREMENT;
+
+    char *dest = malloc(buffer->cap);
+    memcpy(dest, buffer->dat, buffer->size);
+
+    free(buffer->dat);
+    buffer->dat = dest;
+  }
 }

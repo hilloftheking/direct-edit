@@ -18,6 +18,26 @@
 int main(int argc, char *argv[]) {
   static const char window_title[] = "Direct Edit";
 
+  Buffer *buf = &program.text_buf;
+
+  if (argc > 1) {
+    FILE *file = fopen(argv[1], "r");
+    if (!file) {
+      perror("fopen()");
+      return -1;
+    }
+
+    // Load the file into the program's buffer
+    char file_content[64];
+    size_t size_read;
+    do {
+      size_read = fread(file_content, 1, sizeof file_content, file);
+      buffer_insert(buf, file_content, size_read);
+    } while (size_read == sizeof file_content);
+  } else {
+    buffer_insert(buf, window_title, sizeof window_title - 1);
+  }
+
   int sdl_error = 0;
   do {
     if (SDL_Init(SDL_INIT_VIDEO)) {
@@ -52,13 +72,6 @@ int main(int argc, char *argv[]) {
       fputs("failed to load font.bmp", stderr);
       break;
     }
-
-    // Put the window title into the program's text buffer
-    Buffer *buf = &program.text_buf;
-    buf->dat = malloc(50);
-    buf->size = 0;
-    buf->cap = 50;
-    buffer_insert(buf, window_title, sizeof window_title - 1);
 
     // This is used to attempt to synchronize the renderer with vsync so
     // that events are handled ASAP
