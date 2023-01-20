@@ -21,11 +21,9 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  int sdl_error = 0;
   int should_quit = 0;
   while (!should_quit) {
-    sdl_error = program_render();
-    if (sdl_error) {
+    if (program_render()) {
       fputs(SDL_GetError(), stderr);
       break;
     }
