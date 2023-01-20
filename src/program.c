@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include "bitmap.h"
+#include "buffer.h"
 #include "program.h"
 
 Program program = {NULL, NULL, NULL, {0}};

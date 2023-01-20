@@ -2,8 +2,6 @@
 
 #include <SDL.h>
 
-#include "bitmap.h"
-#include "buffer.h"
 #include "program.h"
 
 // This fixes whatever SDL tries to do on Windows with main
