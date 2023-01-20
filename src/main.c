@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
     fputs("init failed", stderr);
   }
 
+  program.text_buf.pos = 0;
+
   int should_quit = 0;
   while (!should_quit) {
     if (program_render())

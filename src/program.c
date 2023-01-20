@@ -7,7 +7,7 @@
 #include "buffer.h"
 #include "program.h"
 
-Program program = {NULL, NULL, NULL, {0}};
+Program program;
 
 int program_init(int argc, char *argv[]) {
   Buffer *buf = &program.text_buf;
@@ -127,47 +127,22 @@ static SDL_Point program_draw_text() {
 }
 
 int program_render() {
-  // This is used to attempt to synchronize the renderer with vsync so
-  // that events are handled ASAP
-  static Uint64 ms_render_interval = 0;
-  static Uint64 last_present_tick = 0;
-  static SDL_DisplayMode disp_mode = {0};
-
   int sdl_error = 0;
   do {
-    // Only attempt to render a little before the present should be
-    // due. This prevents blocking the event handling
-    if (SDL_GetTicks64() - last_present_tick > ms_render_interval) {
-      SDL_SetRenderDrawColor(program.renderer, 12, 25, 48, 255);
-      if (SDL_RenderClear(program.renderer)) {
-        sdl_error = 1;
-        break;
-      }
-
-      SDL_Point cursor_point = program_draw_text();
-      SDL_Rect cursor_rect = {cursor_point.x, cursor_point.y,
-                              font_settings.width * font_settings.scale,
-                              font_settings.height * font_settings.scale};
-      SDL_SetRenderDrawColor(program.renderer, 255, 255, 255, 100);
-      SDL_RenderFillRect(program.renderer, &cursor_rect);
-
-      SDL_RenderPresent(program.renderer);
-      last_present_tick = SDL_GetTicks64();
-
-      // Change the interval at which presenting is attempted
-      // since the refresh rate may have changed
-      if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(program.window),
-                                    &disp_mode)) {
-        sdl_error = 1;
-        break;
-      }
-      // Try to present 1ms early so vsync is beaten
-      ms_render_interval = (1000 / disp_mode.refresh_rate) - 1;
-      if (ms_render_interval == (Uint64)-1) {
-        // Future proofing for 1000hz+
-        ms_render_interval = 0;
-      }
+    SDL_SetRenderDrawColor(program.renderer, 12, 25, 48, 255);
+    if (SDL_RenderClear(program.renderer)) {
+      sdl_error = 1;
+      break;
     }
+
+    SDL_Point cursor_point = program_draw_text();
+    SDL_Rect cursor_rect = {cursor_point.x, cursor_point.y,
+                            font_settings.width * font_settings.scale,
+                            font_settings.height * font_settings.scale};
+    SDL_SetRenderDrawColor(program.renderer, 255, 255, 255, 100);
+    SDL_RenderFillRect(program.renderer, &cursor_rect);
+
+    SDL_RenderPresent(program.renderer);
   } while (0);
 
   if (sdl_error)
@@ -203,23 +178,26 @@ static void handle_key(SDL_Scancode scancode) {
 
 int program_process() {
   SDL_Event event;
-  SDL_PollEvent(&event);
-
   int should_quit = 0;
-  switch (event.type) {
-  case SDL_QUIT:
-    should_quit = 1;
-    break;
-  case SDL_TEXTINPUT: {
-    char *input = event.text.text;
-    size_t len = strlen(input);
-    buffer_insert(&program.text_buf, input, len);
 
-    break;
-  }
-  case SDL_KEYDOWN:
-    handle_key(event.key.keysym.scancode);
-    break;
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+    case SDL_QUIT:
+      should_quit = 1;
+      break;
+    case SDL_TEXTINPUT: {
+      char *input = event.text.text;
+      size_t len = strlen(input);
+      buffer_insert(&program.text_buf, input, len);
+
+      break;
+    }
+    case SDL_KEYDOWN:
+      handle_key(event.key.keysym.scancode);
+      break;
+    default:
+      break;
+    }
   }
 
   return should_quit;
