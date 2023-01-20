@@ -12,21 +12,14 @@
 #endif
 
 int main(int argc, char *argv[]) {
-  int init_err = program_init(argc, argv);
-  if (init_err == 1) {
-    printf("init failed: %s\n", SDL_GetError());
-    return -1;
-  } else if (init_err == -1) {
-    perror("init failed");
-    return -1;
+  if (program_init(argc, argv)) {
+    fputs("init failed", stderr);
   }
 
   int should_quit = 0;
   while (!should_quit) {
-    if (program_render()) {
-      fputs(SDL_GetError(), stderr);
+    if (program_render())
       break;
-    }
     should_quit = program_process();
   }
 

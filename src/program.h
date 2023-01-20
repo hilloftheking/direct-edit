@@ -29,7 +29,7 @@ struct {
 
 static const char window_title[] = "Direct Edit";
 
-// Initializes the program, returns 1 on SDL error, -1 on errno
+// Initializes the program, returns 1 on error
 int program_init(int argc, char *argv[]);
 
 // Quits the program, duh

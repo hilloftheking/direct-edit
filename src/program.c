@@ -15,7 +15,7 @@ int program_init(int argc, char *argv[]) {
     FILE *file = fopen(argv[1], "r");
     if (!file) {
       perror("fopen()");
-      return -1;
+      return 1;
     }
 
     // Load the file into the program's buffer
@@ -66,6 +66,9 @@ int program_init(int argc, char *argv[]) {
 
     SDL_StartTextInput();
   } while (0);
+
+  if (sdl_error)
+    fputs(SDL_GetError(), stderr);
 
   return sdl_error;
 }
@@ -165,6 +168,9 @@ int program_render() {
       }
     }
   } while (0);
+
+  if (sdl_error)
+    fputs(SDL_GetError(), stderr);
 
   return sdl_error;
 }
