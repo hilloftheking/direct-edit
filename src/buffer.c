@@ -43,7 +43,7 @@ void buffer_pop(Buffer *buffer) {
   buffer->size--;
   if (buffer->pos != 0)
     buffer->pos--;
-  
+
   if (buffer->cap - buffer->size > BUFFER_INCREMENT * 4) {
     puts("making buffer smaller");
     buffer->cap = buffer->size + BUFFER_INCREMENT;
