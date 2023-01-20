@@ -1,1 +1,1 @@
-font.bmp - https://opengameart.org/content/ascii-bitmap-font-oldschool CC0
+font.bmp - modified from https://opengameart.org/content/ascii-bitmap-font-oldschool (CC0)

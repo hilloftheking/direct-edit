@@ -24,14 +24,13 @@ int main(int argc, char *argv[]) {
   int sdl_error = 0;
   int should_quit = 0;
   while (!should_quit) {
-    should_quit = program_process();
     sdl_error = program_render();
-    if (sdl_error)
+    if (sdl_error) {
+      fputs(SDL_GetError(), stderr);
       break;
+    }
+    should_quit = program_process();
   }
-
-  if (sdl_error)
-    fputs(SDL_GetError(), stderr);
 
   program_quit();
 }
