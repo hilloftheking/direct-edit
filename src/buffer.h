@@ -9,8 +9,8 @@ typedef struct Buffer {
   char *dat;
   size_t size;
   size_t cap;
-  
-  size_t pos; // Cursor position
+
+  size_t pos;         // Cursor position
   SDL_Point top_left; // For scrolling
 } Buffer;
 
