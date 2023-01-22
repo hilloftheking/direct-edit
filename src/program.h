@@ -24,7 +24,7 @@ struct {
     5, // Width
     7, // Height
     1, // Horizontal Padding
-    2  // Vertial Padding
+    2  // Vertical Padding
 };
 
 static const char window_title[] = "Direct Edit";

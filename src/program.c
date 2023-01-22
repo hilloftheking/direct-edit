@@ -80,12 +80,19 @@ void program_quit() {
 }
 
 static SDL_Point program_draw_text() {
+  /* TODO: Further optimize scrolling:
+      - maybe a list of line start positions? this would make it easier to
+      set the cursor position and to tell what text needs to be rendered */
+
+  static SDL_Point *top_left = &program.text_buf.top_left;
+
+  // The visible area where text should be drawn
+  SDL_Rect visible = {top_left->x, top_left->y, 0, 0};
+  SDL_GetWindowSize(program.window, &visible.w, &visible.h);
+
   // dst_rect is the rectangle of the render target that will change
-  SDL_Rect dst_rect;
-  dst_rect.x = 0;
-  dst_rect.y = 0;
-  dst_rect.w = font_settings.width * font_settings.scale;
-  dst_rect.h = font_settings.height * font_settings.scale;
+  SDL_Rect dst_rect = {0, 0, font_settings.width * font_settings.scale,
+                       font_settings.height * font_settings.scale};
 
   SDL_Point ret_cursor_point;
 
@@ -99,25 +106,34 @@ static SDL_Point program_draw_text() {
       break;
 
     char c = program.text_buf.dat[i];
-    int index;
-    if (c >= ' ' && c <= '~') {
-      index = c - ' ';
-    } else if (c == '\n') {
-      dst_rect.y += 8 * font_settings.scale; // 7px + 1px spacing
+    if (c == '\n') {
+      dst_rect.y += (font_settings.height + font_settings.y_padding) *
+                    font_settings.scale;
       dst_rect.x = 0;
       continue;
-    } else {
-      index = '?' - ' ';
     }
 
-    // The rectangle of font_tex to copy
-    SDL_Rect src_rect;
-    src_rect.x = 1 + (index % 18) * 5 + (index % 18) * 2;
-    src_rect.y = 1 + (index / 18) * 7 + (index / 18) * 2;
-    src_rect.w = 5;
-    src_rect.h = 7;
+    if (SDL_PointInRect((SDL_Point *)&dst_rect, &visible)) {
+      int index;
+      if (c >= ' ' && c <= '~') {
+        index = c - ' ';
+      } else {
+        index = '?' - ' ';
+      }
 
-    SDL_RenderCopy(program.renderer, program.font_tex, &src_rect, &dst_rect);
+      // The rectangle of font_tex to copy
+      SDL_Rect src_rect;
+      src_rect.x = 1 + (index % 18) * 5 + (index % 18) * 2;
+      src_rect.y = 1 + (index / 18) * 7 + (index / 18) * 2;
+      src_rect.w = 5;
+      src_rect.h = 7;
+
+      dst_rect.x -= top_left->x;
+      dst_rect.y -= top_left->y;
+      SDL_RenderCopy(program.renderer, program.font_tex, &src_rect, &dst_rect);
+      dst_rect.x += top_left->x;
+      dst_rect.y += top_left->y;
+    }
 
     dst_rect.x += (font_settings.width + font_settings.x_padding) *
                   font_settings.scale; // 5px + 1px spacing
@@ -194,6 +210,11 @@ int program_process() {
     }
     case SDL_KEYDOWN:
       handle_key(event.key.keysym.scancode);
+      break;
+    case SDL_MOUSEWHEEL:
+      program.text_buf.top_left.y -=
+          event.wheel.y * (font_settings.height + font_settings.y_padding) *
+          font_settings.scale;
       break;
     default:
       break;
