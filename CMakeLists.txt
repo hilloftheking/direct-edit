@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.00)
 project(direct-edit)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-file(GLOB PROJECT_SOURCES src/*.c)
+set(PROJECT_SOURCES src/main.c src/buffer.c src/program.c)
 
 add_executable(out ${PROJECT_SOURCES})
 

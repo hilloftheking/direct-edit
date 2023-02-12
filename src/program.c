@@ -220,6 +220,25 @@ static void handle_key(SDL_Scancode scancode) {
       program.text_buf.pos++;
     break;
 
+  case SDL_SCANCODE_HOME:
+    while (program.text_buf.pos != 0) {
+      program.text_buf.pos--;
+      if (program.text_buf.dat[program.text_buf.pos] == '\n') {
+        program.text_buf.pos++;
+        break;
+      }
+    }
+    break;
+
+  case SDL_SCANCODE_END:
+    while (program.text_buf.pos != program.text_buf.size) {
+      if (program.text_buf.dat[program.text_buf.pos] == '\n') {
+        break;
+      }
+      program.text_buf.pos++;
+    }
+    break;
+
   default:
     break;
   }
