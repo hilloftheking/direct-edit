@@ -69,25 +69,25 @@ static SDL_Texture *load_1bpp_bitmap(const char *path, SDL_Renderer *renderer) {
 
     for (uint32_t y = 0; y < h; y++) {
       for (uint32_t x = 0; x < w; x++) {
-        size_t bmp_index = (size_t)pixel_offset + (size_t)y * (w / 8) +
-                           x / 8; /* Accounting for it being
-                                                       packed into a byte */
-        size_t tex_index = (size_t)(h - y - 1) * w * 3 + (size_t)x * 3;
+	size_t bmp_index = (size_t)pixel_offset + (size_t)y * (w / 8) +
+			   x / 8; /* Accounting for it being
+						       packed into a byte */
+	size_t tex_index = (size_t)(h - y - 1) * w * 3 + (size_t)x * 3;
 
-        if (data[bmp_index] & (128 >> (x % 8))) {
-          tex_data[tex_index + 0] = 255;
-          tex_data[tex_index + 1] = 255;
-          tex_data[tex_index + 2] = 255;
-        } else {
-          tex_data[tex_index + 0] = 0;
-          tex_data[tex_index + 1] = 0;
-          tex_data[tex_index + 2] = 0;
-        }
+	if (data[bmp_index] & (128 >> (x % 8))) {
+	  tex_data[tex_index + 0] = 255;
+	  tex_data[tex_index + 1] = 255;
+	  tex_data[tex_index + 2] = 255;
+	} else {
+	  tex_data[tex_index + 0] = 0;
+	  tex_data[tex_index + 1] = 0;
+	  tex_data[tex_index + 2] = 0;
+	}
       }
     }
 
     tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
-                            SDL_TEXTUREACCESS_STATIC, w, h);
+			    SDL_TEXTUREACCESS_STATIC, w, h);
     if (!tex) {
       sdl_error = 1;
       break;
