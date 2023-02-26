@@ -44,14 +44,14 @@ int program_init(int argc, char *argv[]) {
     }
 
     program.window =
-        SDL_CreateWindow(window_title,
-                         SDL_WINDOWPOS_UNDEFINED, // X position
-                         SDL_WINDOWPOS_UNDEFINED, // Y position
-                         (font_settings.width + font_settings.x_padding) *
-                             font_settings.scale * 80, // Width (80 characters)
-                         (font_settings.height + font_settings.y_padding) *
-                             font_settings.scale * 24, // Height (24 characters)
-                         SDL_WINDOW_RESIZABLE);
+	SDL_CreateWindow(window_title,
+			 SDL_WINDOWPOS_UNDEFINED, // X position
+			 SDL_WINDOWPOS_UNDEFINED, // Y position
+			 (font_settings.width + font_settings.x_padding) *
+			     font_settings.scale * 80, // Width (80 characters)
+			 (font_settings.height + font_settings.y_padding) *
+			     font_settings.scale * 24, // Height (24 characters)
+			 SDL_WINDOW_RESIZABLE);
     if (!program.window) {
       sdl_error = 1;
       break;
@@ -99,7 +99,7 @@ static SDL_Point program_draw_text() {
 
   // dst_rect is the rectangle of the render target that will change
   SDL_Rect dst_rect = {0, 0, font_settings.width * font_settings.scale,
-                       font_settings.height * font_settings.scale};
+		       font_settings.height * font_settings.scale};
 
   SDL_Point ret_cursor_point;
 
@@ -120,23 +120,23 @@ static SDL_Point program_draw_text() {
       click_rect.h += font_settings.y_padding * font_settings.scale;
       // If click y pos is within this line
       if (clicked.pos.y >= click_rect.y &&
-          clicked.pos.y < click_rect.y + click_rect.h) {
-        // If click x pos is within this character
-        if (clicked.pos.x >= click_rect.x &&
-            clicked.pos.x < click_rect.x + click_rect.w) {
-          program.text_buf.pos = i;
-          clicked.changed = 0;
-        } else if (c == '\n' || i == program.text_buf.size - 1) {
-          // If this characer is the end of the line, just put the cursor here
-          program.text_buf.pos = i;
-          clicked.changed = 0;
-        }
+	  clicked.pos.y < click_rect.y + click_rect.h) {
+	// If click x pos is within this character
+	if (clicked.pos.x >= click_rect.x &&
+	    clicked.pos.x < click_rect.x + click_rect.w) {
+	  program.text_buf.pos = i;
+	  clicked.changed = 0;
+	} else if (c == '\n' || i == program.text_buf.size - 1) {
+	  // If this characer is the end of the line, just put the cursor here
+	  program.text_buf.pos = i;
+	  clicked.changed = 0;
+	}
       }
     }
 
     if (c == '\n') {
       dst_rect.y += (font_settings.height + font_settings.y_padding) *
-                    font_settings.scale;
+		    font_settings.scale;
       dst_rect.x = 0;
       continue;
     }
@@ -144,9 +144,9 @@ static SDL_Point program_draw_text() {
     if (SDL_PointInRect((SDL_Point *)&dst_rect, &visible)) {
       int index;
       if (c >= ' ' && c <= '~') {
-        index = c - ' ';
+	index = c - ' ';
       } else {
-        index = '?' - ' ';
+	index = '?' - ' ';
       }
 
       // The rectangle of font_tex to copy
@@ -168,7 +168,7 @@ static SDL_Point program_draw_text() {
     }
 
     dst_rect.x += (font_settings.width + font_settings.x_padding) *
-                  font_settings.scale; // 5px + 1px spacing
+		  font_settings.scale; // 5px + 1px spacing
   }
 
   clicked.changed = 0;
@@ -186,8 +186,8 @@ int program_render() {
 
     SDL_Point cursor_point = program_draw_text();
     SDL_Rect cursor_rect = {cursor_point.x, cursor_point.y,
-                            font_settings.width * font_settings.scale,
-                            font_settings.height * font_settings.scale};
+			    font_settings.width * font_settings.scale,
+			    font_settings.height * font_settings.scale};
     SDL_SetRenderDrawColor(program.renderer, 255, 255, 255, 100);
     SDL_RenderFillRect(program.renderer, &cursor_rect);
 
@@ -224,8 +224,8 @@ static void handle_key(SDL_Scancode scancode) {
     while (program.text_buf.pos != 0) {
       program.text_buf.pos--;
       if (program.text_buf.dat[program.text_buf.pos] == '\n') {
-        program.text_buf.pos++;
-        break;
+	program.text_buf.pos++;
+	break;
       }
     }
     break;
@@ -233,7 +233,7 @@ static void handle_key(SDL_Scancode scancode) {
   case SDL_SCANCODE_END:
     while (program.text_buf.pos != program.text_buf.size) {
       if (program.text_buf.dat[program.text_buf.pos] == '\n') {
-        break;
+	break;
       }
       program.text_buf.pos++;
     }
@@ -265,8 +265,8 @@ int program_process() {
       break;
     case SDL_MOUSEWHEEL:
       program.text_buf.top_left.y -=
-          event.wheel.y * (font_settings.height + font_settings.y_padding) *
-          font_settings.scale * 2;
+	  event.wheel.y * (font_settings.height + font_settings.y_padding) *
+	  font_settings.scale * 2;
       break;
     case SDL_MOUSEBUTTONDOWN:
       clicked.changed = 1;
