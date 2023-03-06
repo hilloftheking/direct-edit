@@ -7,6 +7,8 @@
 #include "buffer.h"
 #include "program.h"
 
+#define EXPAND_COLOR(sdl_col) sdl_col.r, sdl_col.g, sdl_col.b
+
 Program program;
 
 // This changes when the window is clicked somewhere
@@ -85,8 +87,8 @@ void program_quit() {
   SDL_Quit();
 }
 
-// Draws text (and sets cursor position)
-static SDL_Point program_draw_text() {
+// Draws text (and sets text cursor position as of now)
+static void program_draw_text() {
   /* TODO: Further optimize scrolling:
       - maybe a list of line start positions? this would make it easier to
       set the cursor position and to tell what text needs to be rendered */
@@ -101,13 +103,18 @@ static SDL_Point program_draw_text() {
   SDL_Rect dst_rect = {0, 0, font_settings.width * font_settings.scale,
                        font_settings.height * font_settings.scale};
 
-  SDL_Point ret_cursor_point;
+  SDL_SetTextureColorMod(program.font_tex, EXPAND_COLOR(colors.fg));
 
   // Include the end of text_buf in case the cursor is there.
   for (size_t i = 0; i <= program.text_buf.size; i++) {
     if (i == program.text_buf.pos) {
-      ret_cursor_point.x = dst_rect.x - top_left->x;
-      ret_cursor_point.y = dst_rect.y - top_left->y;
+      SDL_Rect cursor_rect = {dst_rect.x - top_left->x,
+                              dst_rect.y - top_left->y,
+                              font_settings.width * font_settings.scale,
+                              font_settings.height * font_settings.scale};
+      SDL_SetRenderDrawColor(program.renderer, EXPAND_COLOR(colors.sel_bg),
+                             255);
+      SDL_RenderFillRect(program.renderer, &cursor_rect);
     }
     if (i == program.text_buf.size)
       break;
@@ -172,12 +179,9 @@ static SDL_Point program_draw_text() {
   }
 
   clicked.changed = 0;
-  return ret_cursor_point;
 }
 
 int program_render() {
-#define EXPAND_COLOR(sdl_col) sdl_col.r, sdl_col.g, sdl_col.b
-
   int sdl_error = 0;
   do {
     SDL_SetRenderDrawColor(program.renderer, EXPAND_COLOR(colors.bg), 255);
@@ -186,16 +190,8 @@ int program_render() {
       break;
     }
 
-    if (SDL_SetTextureColorMod(program.font_tex, EXPAND_COLOR(colors.fg))) {
-      sdl_error = 1;
-      break;
-    }
-    SDL_Point cursor_point = program_draw_text();
-    SDL_Rect cursor_rect = {cursor_point.x, cursor_point.y,
-                            font_settings.width * font_settings.scale,
-                            font_settings.height * font_settings.scale};
-    SDL_SetRenderDrawColor(program.renderer, 0, 0, 0, 100);
-    SDL_RenderFillRect(program.renderer, &cursor_rect);
+    // program_draw_text manages colors and the cursor as well
+    program_draw_text();
 
     SDL_RenderPresent(program.renderer);
   } while (0);
@@ -204,8 +200,6 @@ int program_render() {
     fputs(SDL_GetError(), stderr);
 
   return sdl_error;
-
-#undef EXPAND_COLOR
 }
 
 static void handle_key(SDL_Scancode scancode) {
