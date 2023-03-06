@@ -27,6 +27,12 @@ struct {
     2  // Vertical Padding
 };
 
+struct {
+  SDL_Color bg, fg, sel_bg;
+} static colors = {{0xfb, 0xf1, 0xc7, 0xFF},
+                   {0x3c, 0x38, 0x36, 0xFF},
+                   {0xf9, 0xf5, 0xd7, 0xFF}};
+
 static const char window_title[] = "Direct Edit";
 
 // Initializes the program, returns 1 on error

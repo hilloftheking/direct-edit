@@ -65,40 +65,42 @@ static SDL_Texture *load_1bpp_bitmap(const char *path, SDL_Renderer *renderer) {
       break;
     }
 
-    tex_data = malloc((size_t)w * (size_t)h * 3ull); // Multiply by 3 for RGB
+    tex_data = malloc((size_t)w * (size_t)h * 4ull); // Multiply by 4 for RGBA
 
     for (uint32_t y = 0; y < h; y++) {
       for (uint32_t x = 0; x < w; x++) {
-	size_t bmp_index = (size_t)pixel_offset + (size_t)y * (w / 8) +
-			   x / 8; /* Accounting for it being
-						       packed into a byte */
-	size_t tex_index = (size_t)(h - y - 1) * w * 3 + (size_t)x * 3;
+        size_t bmp_index = (size_t)pixel_offset + (size_t)y * (w / 8) +
+                           x / 8; /* Accounting for it being
+                                                       packed into a byte */
+        size_t tex_index = (size_t)(h - y - 1) * w * 4 + (size_t)x * 4;
 
-	if (data[bmp_index] & (128 >> (x % 8))) {
-	  tex_data[tex_index + 0] = 255;
-	  tex_data[tex_index + 1] = 255;
-	  tex_data[tex_index + 2] = 255;
-	} else {
-	  tex_data[tex_index + 0] = 0;
-	  tex_data[tex_index + 1] = 0;
-	  tex_data[tex_index + 2] = 0;
-	}
+        if (data[bmp_index] & (128 >> (x % 8))) {
+          tex_data[tex_index + 0] = 255;
+          tex_data[tex_index + 1] = 255;
+          tex_data[tex_index + 2] = 255;
+          tex_data[tex_index + 3] = 255;
+        } else {
+          tex_data[tex_index + 0] = 0;
+          tex_data[tex_index + 1] = 0;
+          tex_data[tex_index + 2] = 0;
+          tex_data[tex_index + 3] = 0;
+        }
       }
     }
 
-    tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
-			    SDL_TEXTUREACCESS_STATIC, w, h);
+    tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
+                            SDL_TEXTUREACCESS_STATIC, w, h);
     if (!tex) {
       sdl_error = 1;
       break;
     }
 
-    if (SDL_UpdateTexture(tex, NULL, tex_data, w * 3)) {
+    if (SDL_UpdateTexture(tex, NULL, tex_data, w * 4)) {
       sdl_error = 1;
       break;
     }
 
-    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_ADD);
+    SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
   } while (0);
 
   if (c_error) {
