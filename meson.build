@@ -1,4 +1,5 @@
-project('directedit', 'c')
+project('directedit', 'c', 
+    default_options: 'default_library=static')
 
 sdl2_dep = dependency('sdl2')
 
